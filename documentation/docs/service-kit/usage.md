@@ -9,7 +9,7 @@ In this document we are showing how to use the service kit to interact with the
 
 ## Creating a Vault and a Wallet Database
 
-The first step is to create a vault. The vault is where the master key is stored.
+The first step is to create a vault, which securely stores the master key. The vault is encrypted with a password you provide. Along with the vault, we also create a wallet state database to track the wallet's state.
 
 ```scala
 // You can run this code using scala-cli. Save it in a file called `create-vault.sc` and run it with `scala-cli create-vault.sc`
@@ -77,20 +77,20 @@ val wallet = CreateWallet(file, password)
 wallet.createWallet.unsafeRunSync()
 ```
 
-This will create an encrypted vault and print it to the console. The vault is
-encrypted with the password provided. It will also create a wallet state database
-file called `myWallet.db` and print the mnemonic to recover the wallet to the
-standard ouput.
+### Code Breakdown:
+1. **Vault Creation**: The `walletApi.createNewWallet` function creates a new wallet in memory.
+2. **Key Extraction**: The `walletApi.extractMainKey` function retrieves the main key, which is essential for initializing the wallet state.
+3. **Wallet Initialization**: The `walletStateApi.initWalletState` function sets up the wallet's state on the specified network. This includes storing the key pair in the database for future transactions.
 
-This code has several parts:
+### Troubleshooting:
+- If the `walletApi.createNewWallet` or `walletApi.extractMainKey` step fails, ensure that the password is correct and the file paths are valid.
+- You may also want to verify the permissions of the database file (`myWallet.db`) to ensure it’s accessible.
 
-- first, it creates a wallet in memory (the `walletApi.createNewWallet` function)
-- then, it extracts the main key from the wallet (the `walletApi.extractMainKey` function)
-- finally, it initializes the wallet database (the `walletStateApi.initWalletState` function)
+This will create an encrypted vault and print it to the console. It will also create a wallet state database file called `myWallet.db` and print the mnemonic to recover the wallet.
 
 ## Updating the Wallet Database
 
-Users must update the wallet state whenever one of their child keys is used to create a new transaction.
+Whenever a child key from the wallet is used to create a transaction, the wallet state must be updated. This section builds on the previous one and shows how to update the wallet state.
 
 ```scala
 // You can run this code using scala-cli. Save it in a file called `create-vault.sc` and run it with `scala-cli create-vault.sc`
@@ -181,20 +181,20 @@ wallet.createWallet.unsafeRunSync()
 wallet.updateWallet.unsafeRunSync()
 ```
 
-This builds off of the example from the previous section. A new part is added to update the wallet state.
+### Key Concepts:
+- **Lock**: A lock is associated with specific indices in the wallet. It acts as a security mechanism to control access to funds.
+- **Predicate**: This is a condition encoded in the lock that must be fulfilled for the lock to be opened.
+- **Verification Key**: The verification key is derived from a parent key and is used to authenticate transactions.
 
-This addition has several parts:
-- first, it sets the indices to use for the update. Here we chose (x=1, y=1, z=2). Per the `initWalletState`, (x=1, y=1) represents
-the "self" fellowship and the "default" template.
-- then, it creates the lock for these indices. We use the `getLock` function to retrieve the lock from the wallet state 
-for `self`, `default` and z=2 (per the indices chosen). We know this fellowship and default template exist because it was 
-initialized per `initWalletState`.
-- then, it creates the lock address from the lock. We used the TransactionBuilder to accomplish this, however, you can 
-build one manually if you desire.
-- then, it retrieves the predicate from the lock and encodes it to base58.
-- then, it retrieves the parent verification key from the wallet existing state using `getEntityVks` for the "self" 
-fellowship and the "default" template. We know this fellowship and default template exist because it was
-initialized per `initWalletState`. 
-- then, it derives the child verification key from the parent verification key using the `deriveChildVerificationKey` for 
-the new z=2 index.
-- finally, it updates the wallet state using the `updateWalletState` function.
+### Steps:
+1. Set the indices to `(x=1, y=1, z=2)` to represent the "self" fellowship and "default" template.
+2. Retrieve the lock using the `getLock` function for the chosen indices.
+3. Generate a lock address from the lock using the `TransactionBuilder`.
+4. Encode the lock's predicate using Base58 encoding.
+5. Retrieve the parent verification key for "self" and "default" using `getEntityVks`.
+6. Derive a child verification key from the parent key using the new index (z=2).
+7. Update the wallet state using the `updateWalletState` function to reflect the changes.
+
+### Troubleshooting:
+- If you encounter issues retrieving the lock or verification key, ensure that the indices match the initialized state from the previous section.
+- Verify that the encoded predicate and lock address are correctly generated before updating the wallet state.

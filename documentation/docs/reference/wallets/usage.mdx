@@ -4,19 +4,26 @@ title: Usage
 description: Use a Wallet to generate keys
 ---
 
-import ScaladocLink from '@site/src/components/ScaladocLink';
+import ScaladocLink from "@site/src/components/ScaladocLink";
 
-With a wallet, you can generate key pairs for use in the blockchain network. Our implementation
-of a hierarchical deterministic (HD) wallet uses ExtendedEd25519. Using an HD wallet, you can derive many keys for a given "main" key.
-This page will walk you through the process of accessing your main key pair as well as deriving child key pairs for a
+With a wallet, you can generate key pairs for use in the blockchain network. Our implementation of a 
+hierarchical deterministic (HD) wallet uses [Extended Ed25519](https://pub.dev/documentation/bip32_ed25519/latest/). 
+**HD wallets allow you to derive multiple child key pairs from a single main key, which helps in better managing 
+cryptocurrencies by separating transaction keys from master keys.** 
+
+This page will walk you through the process of accessing your main key pair and deriving child key pairs for a 
 3-layer path (x/y/z).
 
 ## Prerequisites
 
-To use a wallet, a wallet instance must exist. To create a wallet instance, read [Create a Wallet](./create)
-or [Import a Wallet](./import). The following snippet is an example of creating a new wallet instance using Cats Effect
-`IO` and the default implementation of
-the <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>:
+To use a wallet, a wallet instance must exist. To create a wallet instance, read [Create a Wallet](./create) or [Import a Wallet](./import).
+
+:::note
+This implementation uses [Cats Effect](https://typelevel.org/cats-effect/docs/2.x/datatypes/io), a library for functional programming in Scala, which provides the capability to work with asynchronous and concurrent programming. 
+:::
+
+The following snippet demonstrates how to create a new wallet instance using Cats Effect `IO` and the default implementation of the <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>
+:
 
 ```scala
 import cats.effect.IO
@@ -42,9 +49,10 @@ def extractMainKey(
 ): F[Either[WalletApi.WalletApiFailure, KeyPair]]
 ```
 
-This function extracts and decrypts the main key pair from the given encrypted `VaultStore` using the given password.
+This function extracts and decrypts the main key pair from the given encrypted `VaultStore` using the provided password.
 
-The parameters are as follows:
+**Parameters:**
+
 - `vaultStore`: The encrypted `VaultStore` containing the main key pair.
 - `password`: The password used to encrypt the `VaultStore`.
 
@@ -54,8 +62,7 @@ a <ScaladocLink path="co/topl/brambl/wallet/WalletApi$$WalletApiFailure.html"><c
 which specifies the reason for failure.
 
 :::caution
-For maximum security, the main key pair should never be used to create and prove transactions. Instead, use a
-child key pair derived from the main key pair.
+For maximum security, the main key pair should never be used to create and prove transactions. Instead, always use a child key pair derived from the main key pair.
 :::
 
 ### Example
@@ -95,17 +102,16 @@ def loadAndExtractMainKey[G[_]: Monad: FunctionK[F, G]](
 ): G[Either[WalletApi.WalletApiFailure, KeyPair]]
 ```
 
-This function loads an encrypted wallet (specified by `name`) from the `WalletKeyApiAlgebra` used to initialize the
-Wallet API, and then extracts and decrypts the main key pair contained within it using the given password.
+This function loads an encrypted wallet (specified by `name`) from the `WalletKeyApiAlgebra` used to initialize the Wallet API, and then extracts and decrypts the main key pair contained within it using the provided password.
 
-The parameters are as follows:
+**Parameters:**
+
 - `password`: The password used to encrypt the `VaultStore`.
 - `name`: The name of the wallet to load. Defaults to "default".
 
-Type parameters:
-- `G`: The context, bound to a context parameter of type `Monad[G]` and transformable to `F` (using Cats `FunctionK`),
-where `F` is the type parameter used in the WalletApi instance. Most commonly, `G` will be the same as `F` and will be transformed
-using `FunctionK.id[F]`.
+**Type Parameters:**
+
+- `G`: The context, bound to a context parameter of type `Monad[G]` and transformable to `F` (using Cats `FunctionK`), where `F` is the type parameter used in the WalletApi instance. Most commonly, `G` will be the same as `F` and will be transformed using `FunctionK.id[F]`.
 
 On success, the function returns the decrypted
 main [key pair](https://github.com/Topl/protobuf-specs/blob/main/proto/quivr/models/shared.proto#L78). On failure, the function returns
@@ -113,8 +119,7 @@ a <ScaladocLink path="co/topl/brambl/wallet/WalletApi$$WalletApiFailure.html"><c
 which specifies the reason for failure.
 
 :::caution
-For maximum security, the main key pair should never be used to create and prove transactions. Instead, use a
-child key pair derived from the main key pair.
+For maximum security, the main key pair should never be used to create and prove transactions. Instead, always use a child key pair derived from the main key pair.
 :::
 
 ### Example
@@ -122,7 +127,7 @@ child key pair derived from the main key pair.
 The following example shows how to load a wallet and extract its main key pair after previously persisting it using
 the default implementation of the `WalletKeyApi` provided by
 the <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>. This default implementation
-of the `WalletKeyApi` uses the local filesystem to persist the wallet and mnemonic..
+of the `WalletKeyApi` uses the local filesystem to persist the wallet and mnemonic.
 
 ```scala
 import cats.arrow.FunctionK
@@ -139,7 +144,7 @@ implicit val transformType: FunctionK[IO, IO] = FunctionK.id[IO]
 val homeDir = System.getProperty("user.home")
 // Replace with the desired location for your key file
 val keyFile = new File(homeDir, "mainkey.json").getCanonicalPath
-// Replace with the desired location of for your mnemonic file
+// Replace with the desired location of your mnemonic file
 val mnemonicFile = new File(homeDir, "mnemonic.txt").getCanonicalPath
 
 val password = "password".getBytes
@@ -168,13 +173,11 @@ def deriveChildKeys(
 ): F[KeyPair]
 ```
 
-This function derives a child key pair from the given main key pair using the given indices. The indices contain the
-3-layer path (x/y/z) for the child key pair. For a more formal definition of the derivation paths,
-see [TIP-0004](https://github.com/Topl/tips/tree/main/TIP-0004). For the most basic use case, the `x/y` path can be hardcoded
-to a constant value (for ex. `10/10`) and the `z` path can be incremented for each new child key pair needed.
+This function derives a child key pair from the given main key pair using the specified indices. The indices contain the 3-layer path (x/y/z) for the child key pair. For a more formal definition of the derivation paths, see [TIP-0004](https://github.com/Topl/tips/tree/main/TIP-0004). For the most basic use case, the `x/y` path can be hardcoded to a constant value (e.g., `10/10`), and the `z` path can be incremented for each new child key pair needed.
 
-The parameters are as follows:
-- `keyPair`: The main key pair to derive the child key pair from.
+**Parameters:**
+
+- `keyPair`: The main key pair from which to derive the child key pair.
 - `idx`: The indices containing the 3-layer path (x/y/z) for the child key pair.
 
 This function returns the derived child [key pair](https://github.com/Topl/protobuf-specs/blob/main/proto/quivr/models/shared.proto#L78).
@@ -193,14 +196,27 @@ import co.topl.brambl.servicekit.WalletKeyApi
 val password = "password".getBytes
 val walletApi = WalletApi.make[IO](WalletKeyApi.make())
 
-val mainKey = (for {
+val mainKey = for {
   newWallet <- walletApi.createNewWallet(password)
   decryptedKey <- walletApi.extractMainKey(newWallet.toOption.get.mainKeyVaultStore, password)
-} yield decryptedKey.toOption.get).unsafeRunSync()
+} yield decryptedKey.toOption.get
 
-// highlight-start
-val childKey1 = walletApi.deriveChildKeys(mainKey, Indices(10, 10, 0)).unsafeRunSync()
-val childKey2 = walletApi.deriveChildKeys(mainKey, Indices(10, 10, 1)).unsafeRunSync()
-// highlight-end
+// highlight-next-line
+val childKey1 = mainKey.map(key => walletApi.deriveChildKeys(key, Indices(10, 10, 1)))
+val childKey2 = mainKey.map(key => walletApi.deriveChildKeys(key, Indices(10, 10, 2)))
+
+childKey1.unsafeRunSync()
+childKey2.unsafeRunSync()
 ```
 
+### Path Indices Explanation
+
+In the example above, the indices are specified as `Indices(10, 10, z)`, where `z` is incremented for each new child key pair derived. The first two indices (10/10) represent a hardcoded path, while the third index varies with each call. This allows for multiple transactions to use distinct keys without compromising the main key pair's security.
+
+:::danger
+It’s important to note that using the main key pair for transactions can compromise your wallet's security. Always derive and use child key pairs for transaction signing and proving.
+:::
+
+## Conclusion
+
+Now that you have learned how to extract and derive keys, consider exploring how to use the derived child key pairs in transactions to enhance the security and management of your cryptocurrency.

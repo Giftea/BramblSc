@@ -4,39 +4,55 @@ title: Getting Started
 description: Get started with the Scala Brambl SDK.
 ---
 
-import ScaladocLink from '@site/src/components/ScaladocLink';
+import ScaladocLink from "@site/src/components/ScaladocLink";
+
+Welcome to the **Brambl SDK**! This SDK is designed to help developers interact with the Brambl blockchain network efficiently. 
+In this guide, we'll walk you through setting up the SDK in your Scala project, explore key components like the `ServiceKit`, and provide 
+useful resources to help you contribute to the project.
 
 ## Installation
+The Brambl SDK is built for Scala 2.13 and is available on [Maven Central](https://search.maven.org/artifact/co.topl/brambl-sdk_2.13). 
+To include it in your Scala project, first ensure you have [Scala Build Tool (SBT)](https://www.scala-sbt.org/1.x/docs/Setup.html) installed. 
 
-### Quick Start
-
-The Scala Brambl SDK is published to [Maven Central](https://search.maven.org/artifact/co.topl/brambl-sdk_2.13) and is
-built for Scala 2.13. To use it in your project, add the following to your `build.sbt`:
+Then, add the following lines to your `build.sbt` file:
 
 ```scala title="build.sbt"
-val bramblVersion = "2.0.0" // replace with the latest version
+val bramblVersion = "2.0.0" // Replace with the latest version
 
 libraryDependencies += "co.topl" %% "brambl-sdk" % bramblVersion
 ```
 
-The list of versions can be found [here](https://central.sonatype.com/artifact/co.topl/brambl-sdk_2.13/versions).
+:::tip
+Always check for the latest version of Brambl SDK [here](https://central.sonatype.com/artifact/co.topl/brambl-sdk_2.13/versions). 
+We recommend using the latest version for optimal performance and security.
+:::
 
-### Service Kit
+### Verify Installation
+To verify the SDK is installed correctly, try running the following basic Scala program:
 
-Wallet functionality in the Brambl SDK requires an implementation of a `ServiceKit` which is responsible for implementing
-any un-implemented, application-specific, traits in
-the <ScaladocLink path="co/topl/brambl/dataApi/index.html"><code>DataApi</code></ScaladocLink>
-package. Specifically, it handles data persistence. The SDK provides a default implementation of
-the <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>
-that is published to [Maven Central](https://search.maven.org/artifact/co.topl/service-kit_2.13) for your convenience.
-This default implementation uses local storage and SQLite. To learn more, see [Overview of Service Kit](../service-kit/big-picture).
-To use it in your project, add the following to your `build.sbt`:
+```scala
+object Main extends App {
+  println("Brambl SDK is installed and ready!")
+}
+```
+
+If the program runs and prints the message, you're good to go! 🎉
+
+## Service Kit
+
+The Brambl SDK comes equipped with a powerful <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink> that manages wallet functionality and data persistence. 
+It implements traits from the <ScaladocLink path="co/topl/brambl/dataApi/index.html"><code>DataApi</code></ScaladocLink> package that may not be covered by the default SDK setup. The SDK provides a default implementation that handles data storage using local storage and SQLite.
+
+To use the Service Kit, add the following dependency to your `build.sbt` file:
 
 ```scala title="build.sbt"
-val bramblVersion = "2.0.0" // replace with the latest version
+val bramblVersion = "2.0.0" // Replace with the latest version
 
 libraryDependencies += "co.topl" %% "service-kit" % bramblVersion
 ```
+
+For more detailed information, check out the [Service Kit Overview](../service-kit/big-picture).
+
 
 ### Other Libraries
 

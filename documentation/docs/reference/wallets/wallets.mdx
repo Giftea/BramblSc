@@ -1,13 +1,15 @@
 ---
-sidebar_position: 2
-title: Wallet Keys
-description: Learn how to initialize and use a wallet
+
+sidebar_position: 2  
+title: Wallet Keys  
+description: Learn how to initialize and use a wallet  
+
 ---
 
-import DocCardList from '@theme/DocCardList';
+import DocCardList from '@theme/DocCardList';  
 import ScaladocLink from '@site/src/components/ScaladocLink';
 
-A Wallet manages your Keys which will allow you to create and prove transactions.
+A Wallet manages your Keys, which will allow you to create and prove transactions. This section covers how to initialize and use a wallet.
 
 ## Prerequisites
 
@@ -17,13 +19,15 @@ The following requires access to a Wallet API instance. You can initialize once 
 val walletApi = WalletApi.make[F](walletKeyApi)
 ```
 
-Where `F` is a type parameter bound to a context parameter of type `Async[F]` and `walletKeyApi` is an implementation of
-the <ScaladocLink path="co/topl/brambl/dataApi/WalletKeyApiAlgebra.html"><code>WalletKeyApiAlgebra</code></ScaladocLink>.
-See the `make`
-function's <ScaladocLink path="co/topl/brambl/wallet/WalletApi$.html#make[F[_]](WalletKeyApiAlgebra[F])(Async[F]):WalletApi[F]"><code>signature</code></ScaladocLink>.
-For example, if you are using Cats Effect `IO` and the default implementation of
-the <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>, you can initialize
-the Wallet Api as follows:
+Where:
+- `F` is a type parameter bound to a context parameter of type `Async[F]`. 
+- `walletKeyApi` is an implementation of the <ScaladocLink path="co/topl/brambl/dataApi/WalletKeyApiAlgebra.html"><code>WalletKeyApiAlgebra</code></ScaladocLink>.
+
+For more information, refer to the `make` function's <ScaladocLink path="co/topl/brambl/wallet/WalletApi$.html#make[F[_]](WalletKeyApiAlgebra[F])(Async[F]):WalletApi[F]"><code>signature</code></ScaladocLink>.
+
+### Example: Initializing with Cats Effect `IO`
+
+If you’re using Cats Effect `IO` and the default implementation of <ScaladocLink path="co/topl/brambl/servicekit/index.html"><code>ServiceKit</code></ScaladocLink>, initialize the `WalletApi` like this:
 
 ```scala
 import cats.effect.IO
@@ -33,8 +37,8 @@ import co.topl.brambl.wallet.WalletApi
 val walletApi = WalletApi.make[IO](WalletKeyApi.make())
 ```
 
-## Reference
+This snippet sets up an `IO`-based Wallet API instance using `WalletKeyApi`.
 
-The first step to using a wallet is to initialize one. The SDK provides a way to create a new wallet from scratch or to import an existing wallet.
+## Next Steps
 
 <DocCardList/>
